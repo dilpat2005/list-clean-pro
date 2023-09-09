@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Other Lists</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .completed {
+            text-decoration: line-through;
+        }
+        .active {
+            font-weight: bold;
+        }
+        .note-text {
+            font-style: italic;
+            color: #888;
+        }
+    </style>
+</head>
+<body class="container mt-5 bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <a class="navbar-brand" href="#">Checklist App</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item active">
+                <a class="nav-link" href="{{ url_for('view_other_lists') }}">View Other Housekeeper Lists</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('index') }}">Assign Tasks</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('assign_rooms') }}">Assign Rooms</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<h1 class="mb-4">View Other Users' Tasks</h1>
+
+{% if current_user.role == 'admin' %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h4>Select a User:</h4>
+        <select class="form-control" onchange="location = this.value;">
+            <option value="{{ url_for('view_other_lists') }}" {% if selected_user_id is none %}selected{% endif %}>All Tasks</option>
+            <option value="{{ url_for('view_other_lists') }}" {% if selected_user_id == current_user.id %}selected{% endif %}>Admin (You)</option>
+            {% for user in users %}
+                <option value="{{ url_for('view_other_lists', user_id=user[0]) }}" {% if selected_user_id == user[0] %}selected{% endif %}>{{ user[1] }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<div class="mb-4">
+    <form action="/clear_all" method="post">
+        <button type="submit" class="btn btn-danger">Clear All Tasks</button>
+    </form>
+</div>
+{% endif %}
+
+
+<div class="card">
+    <div class="card-body">
+        <ul class="list-group">
+        {% for item in items %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    {% if item[2] %}<span class="badge badge-success">Completed</span>{% else %}<span class="badge badge-warning">Pending</span>{% endif %}
+                </div>
+                <div>
+                    <strong>{{ item[3] }}:</strong> {{ item[1] }}
+                    <p class="note-text">Note: {{ item[5] or 'No notes added.' }}</p>
+                </div>
+                <div>
+                    <a href="/complete/{{ item[0] }}" class="btn btn-success btn-sm">Complete</a>
+                    {% if current_user.role == 'admin' %}
+                        <a href="/delete/{{ item[0] }}" class="btn btn-danger btn-sm ml-2">Delete</a>
+                    {% endif %}
+                </div>
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<!-- Bootstrap JS, Popper.js, and jQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
